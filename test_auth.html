@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Authentication</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { background: #f8f9fa; padding: 20px; margin: 20px 0; border-radius: 10px; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .result { background: #e9ecef; padding: 10px; margin: 10px 0; border-radius: 5px; }
+    </style>
+</head>
+<body>
+    <h1>🧪 Authentication Test</h1>
+    
+    <div class="test-section">
+        <h2>Test Registration</h2>
+        <button onclick="testRegister()">Test Register Function</button>
+        <div id="register-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Test Login</h2>
+        <button onclick="testLogin()">Test Login Function</button>
+        <div id="login-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Current User</h2>
+        <button onclick="checkCurrentUser()">Check Current User</button>
+        <div id="user-result" class="result"></div>
+    </div>
+    
+    <div class="test-section">
+        <h2>Clear Data</h2>
+        <button onclick="clearData()">Clear All Data</button>
+        <div id="clear-result" class="result"></div>
+    </div>
+
+    <script src="static-products-data.js"></script>
+    <script src="database.js"></script>
+    
+    <script>
+        async function testRegister() {
+            const result = document.getElementById('register-result');
+            try {
+                const userData = {
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    password: 'password123',
+                    phone: '1234567890'
+                };
+                
+                const response = await registerUser(userData);
+                result.innerHTML = `
+                    <h4>Registration Result:</h4>
+                    <pre>${JSON.stringify(response, null, 2)}</pre>
+                `;
+                result.style.background = response.success ? '#d4edda' : '#f8d7da';
+            } catch (error) {
+                result.innerHTML = `<h4>Error:</h4><p>${error.message}</p>`;
+                result.style.background = '#f8d7da';
+            }
+        }
+        
+        async function testLogin() {
+            const result = document.getElementById('login-result');
+            try {
+                const credentials = {
+                    email: 'test@example.com',
+                    password: 'password123'
+                };
+                
+                const response = await loginUser(credentials);
+                result.innerHTML = `
+                    <h4>Login Result:</h4>
+                    <pre>${JSON.stringify(response, null, 2)}</pre>
+                `;
+                result.style.background = response.success ? '#d4edda' : '#f8d7da';
+            } catch (error) {
+                result.innerHTML = `<h4>Error:</h4><p>${error.message}</p>`;
+                result.style.background = '#f8d7da';
+            }
+        }
+        
+        function checkCurrentUser() {
+            const result = document.getElementById('user-result');
+            const user = getCurrentUser();
+            const users = JSON.parse(localStorage.getItem('users')) || [];
+            
+            result.innerHTML = `
+                <h4>Current User:</h4>
+                <pre>${JSON.stringify(user, null, 2)}</pre>
+                <h4>All Users in Storage:</h4>
+                <pre>${JSON.stringify(users, null, 2)}</pre>
+            `;
+        }
+        
+        function clearData() {
+            const result = document.getElementById('clear-result');
+            localStorage.removeItem('users');
+            localStorage.removeItem('currentUser');
+            localStorage.removeItem('cart');
+            localStorage.removeItem('customProducts');
+            
+            result.innerHTML = '<h4>✅ All data cleared!</h4>';
+            result.style.background = '#d4edda';
+        }
+    </script>
+</body>
+</html>

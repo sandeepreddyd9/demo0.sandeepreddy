@@ -1,0 +1,561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - Organic Store</title>
+    <link rel="stylesheet" href="STYLE.css">
+    <link rel="stylesheet" href="Styles.css">
+    <link rel="stylesheet" href="modern-navbar.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 1rem; 
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .cart-container {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .cart-item {
+            display: grid;
+            grid-template-columns: 100px 1fr auto auto auto;
+            gap: 1rem;
+            align-items: center;
+            padding: 1rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .cart-item:last-child {
+            border-bottom: none;
+        }
+
+        .item-image {
+            width: 100px;
+            height: 100px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .item-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .item-info h3 {
+            margin-bottom: 0.5rem;
+            color: #333;
+        }
+
+        .item-info p {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .item-price {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .quantity-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quantity-btn:hover {
+            background: #5a67d8;
+        }
+
+        .quantity-display {
+            min-width: 40px;
+            text-align: center;
+            font-weight: 600;
+        }
+
+        .remove-btn {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+
+        .remove-btn:hover {
+            background: #ff5252;
+        }
+
+        .cart-summary {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 10px;
+            margin-top: 2rem;
+        }
+
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+        }
+
+        .summary-row.total {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #667eea;
+            border-top: 2px solid #ddd;
+            padding-top: 1rem;
+        }
+
+        .checkout-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        .checkout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-cart h2 {
+            margin-bottom: 1rem;
+            color: #333;
+        }
+
+        .continue-shopping {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 1rem;
+        }
+
+        .continue-shopping:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification.success { background: #4CAF50; }
+        .notification.error { background: #f44336; }
+        .notification.show { opacity: 1; }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .cart-item {
+                grid-template-columns: 80px 1fr;
+                gap: 1rem;
+            }
+            
+            .item-price, .quantity-controls, .remove-btn {
+                grid-column: 1 / -1;
+                justify-self: start;
+                margin-top: 0.5rem;
+            }
+            
+            .quantity-controls {
+                justify-self: center;
+            }
+            
+            .remove-btn {
+                justify-self: end;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Navigation Bar -->
+    <nav class="modern-navbar">
+        <div class="navbar-container">
+            <a href="index_db.html" class="navbar-brand">
+                <div class="brand-icon">🌱</div>
+                <span class="brand-text">GreenCart</span>
+            </a>
+
+            <div class="navbar-search">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search organic products...">
+            </div>
+
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="index_db.html" class="nav-link" data-page="home">
+                        <span>🏠</span> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="products_db.html" class="nav-link" data-page="products">
+                        <span>🛒</span> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="cart_db.html" class="nav-link active" data-page="cart">
+                        <span>🛍️</span> Cart
+                        <span class="cart-badge" id="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+
+            <button class="notification-bell">🔔</button>
+
+            <div class="navbar-auth">
+                <button class="auth-btn btn-login">
+                    <span>👤</span> Login
+                </button>
+                <button class="auth-btn btn-register">
+                    <span>✨</span> Register
+                </button>
+            </div>
+
+            <button class="mobile-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div style="height: 80px;"></div>
+
+    <main class="container">
+        <h1>🛍️ Your Shopping Cart</h1>
+        
+        <div class="cart-container">
+            <div id="cart-items">
+                <div class="loading">
+                    <h2>Loading cart...</h2>
+                    <p>Please wait a moment</p>
+                </div>
+            </div>
+            
+            <div id="cart-summary" class="cart-summary" style="display: none;">
+                <div class="summary-row">
+                    <span>Subtotal:</span>
+                    <span id="subtotal">₹0.00</span>
+                </div>
+                <div class="summary-row">
+                    <span>Delivery:</span>
+                    <span id="delivery">₹50.00</span>
+                </div>
+                <div class="summary-row total">
+                    <span>Total:</span>
+                    <span id="total">₹0.00</span>
+                </div>
+                <button class="checkout-btn" onclick="proceedToCheckout()">
+                    🚀 Proceed to Checkout
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="database_real.js"></script>
+    
+    <script>
+        let currentUser = null;
+        let cart = [];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            loadUser();
+            updateAuthUI();
+            loadCart();
+            updateCartCount();
+        });
+
+        function loadUser() {
+            const savedUser = localStorage.getItem('currentUser');
+            currentUser = savedUser ? JSON.parse(savedUser) : null;
+        }
+
+        async function loadCart() {
+            if (!currentUser) {
+                displayEmptyCart('Please login to view your cart');
+                return;
+            }
+
+            try {
+                cart = await getCartItems(currentUser.id);
+                displayCart();
+            } catch (error) {
+                console.error('Error loading cart:', error);
+                showNotification('Error loading cart', 'error');
+                displayEmptyCart('Error loading cart');
+            }
+        }
+
+        function displayCart() {
+            const cartItemsContainer = document.getElementById('cart-items');
+            const cartSummary = document.getElementById('cart-summary');
+
+            if (!currentUser) {
+                displayEmptyCart('Please login to view your cart');
+                return;
+            }
+
+            if (cart.length === 0) {
+                displayEmptyCart('Your cart is empty');
+                cartSummary.style.display = 'none';
+                return;
+            }
+
+            cartItemsContainer.innerHTML = cart.map(item => `
+                <div class="cart-item">
+                    <div class="item-image">
+                        <img src="${item.image_url || 'https://via.placeholder.com/100x100/4CAF50/ffffff?text=' + encodeURIComponent(item.name)}" 
+                             alt="${item.name}"
+                             onerror="this.src='https://via.placeholder.com/100x100/4CAF50/ffffff?text=' + encodeURIComponent('${item.name}')">
+                    </div>
+                    <div class="item-info">
+                        <h3>${item.name}</h3>
+                        <p>Price: ₹${item.price}</p>
+                        <p>Total: ₹${(item.price * item.quantity).toFixed(2)}</p>
+                    </div>
+                    <div class="item-price">₹${item.price}</div>
+                    <div class="quantity-controls">
+                        <button class="quantity-btn" onclick="updateQuantity(${item.product_id}, ${item.quantity - 1})">-</button>
+                        <span class="quantity-display">${item.quantity}</span>
+                        <button class="quantity-btn" onclick="updateQuantity(${item.product_id}, ${item.quantity + 1})">+</button>
+                    </div>
+                    <button class="remove-btn" onclick="removeFromCart(${item.product_id})">Remove</button>
+                </div>
+            `).join('');
+
+            cartSummary.style.display = 'block';
+            updateSummary();
+        }
+
+        function displayEmptyCart(message) {
+            const cartItemsContainer = document.getElementById('cart-items');
+            cartItemsContainer.innerHTML = `
+                <div class="empty-cart">
+                    <h2>🛒 ${message}</h2>
+                    <p>Start shopping to add items to your cart!</p>
+                    <a href="products_db.html" class="continue-shopping">Continue Shopping</a>
+                </div>
+            `;
+        }
+
+        async function updateQuantity(productId, newQuantity) {
+            if (newQuantity <= 0) {
+                removeFromCart(productId);
+                return;
+            }
+
+            try {
+                const result = await updateCartQuantityDB(currentUser.id, productId, newQuantity);
+                
+                if (result.success) {
+                    // Update local cart
+                    const itemIndex = cart.findIndex(item => item.product_id === productId);
+                    if (itemIndex !== -1) {
+                        cart[itemIndex].quantity = newQuantity;
+                    }
+                    
+                    displayCart();
+                    updateCartCount();
+                    showNotification('Quantity updated!', 'success');
+                } else {
+                    showNotification('Failed to update quantity', 'error');
+                }
+            } catch (error) {
+                console.error('Error updating quantity:', error);
+                showNotification('Error updating quantity', 'error');
+            }
+        }
+
+        async function removeFromCart(productId) {
+            try {
+                const result = await removeFromCartDB(currentUser.id, productId);
+                
+                if (result.success) {
+                    // Remove from local cart
+                    cart = cart.filter(item => item.product_id !== productId);
+                    
+                    displayCart();
+                    updateCartCount();
+                    showNotification('Item removed from cart!', 'success');
+                } else {
+                    showNotification('Failed to remove item', 'error');
+                }
+            } catch (error) {
+                console.error('Error removing from cart:', error);
+                showNotification('Error removing item', 'error');
+            }
+        }
+
+        function updateSummary() {
+            const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+            const delivery = subtotal > 1000 ? 0 : 50; // Free delivery over ₹1000
+            const total = subtotal + delivery;
+
+            document.getElementById('subtotal').textContent = `₹${subtotal.toFixed(2)}`;
+            document.getElementById('delivery').textContent = delivery === 0 ? 'FREE' : `₹${delivery.toFixed(2)}`;
+            document.getElementById('total').textContent = `₹${total.toFixed(2)}`;
+        }
+
+        async function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            if (cartCount) {
+                if (currentUser) {
+                    try {
+                        const cartItems = await getCartItems(currentUser.id);
+                        const totalItems = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+                        cartCount.textContent = totalItems || '0';
+                    } catch (error) {
+                        console.error('Error updating cart count:', error);
+                        cartCount.textContent = '0';
+                    }
+                } else {
+                    cartCount.textContent = '0';
+                }
+            }
+        }
+
+        function proceedToCheckout() {
+            if (cart.length === 0) {
+                showNotification('Your cart is empty!', 'error');
+                return;
+            }
+
+            if (!currentUser) {
+                showNotification('Please login to proceed to checkout', 'error');
+                return;
+            }
+
+            // Redirect to checkout page (you can create this later)
+            showNotification('Checkout functionality coming soon!', 'info');
+        }
+
+        // Authentication functions
+        function showAuthForm(type) {
+            // Redirect to homepage for authentication
+            localStorage.setItem('authAction', type);
+            window.location.href = 'index_db.html';
+        }
+
+        function updateAuthUI() {
+            const authSection = document.querySelector('.navbar-auth');
+            if (currentUser) {
+                authSection.innerHTML = `
+                    <span style="color: white; margin-right: 1rem; font-weight: 500;">Welcome, ${currentUser.name}!</span>
+                    <button class="auth-btn" onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                        <span>🚪</span> Logout
+                    </button>
+                `;
+            } else {
+                authSection.innerHTML = `
+                    <button class="auth-btn btn-login" onclick="showAuthForm('login')"><span>👤</span> Login</button>
+                    <button class="auth-btn btn-register" onclick="showAuthForm('register')"><span>✨</span> Register</button>
+                `;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateAuthUI();
+            displayEmptyCart('Please login to view your cart');
+            showNotification('Logged out successfully!', 'success');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const colors = {
+                success: '#4CAF50',
+                error: '#f44336',
+                info: '#2196F3'
+            };
+
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

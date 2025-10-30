@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Organic Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #333;
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1rem;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .dashboard-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .card-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .card-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .card-description {
+            color: #666;
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .card-link {
+            display: block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .card-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .stats-section {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .stat-card {
+            text-align: center;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .quick-actions {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-top: 2rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .action-btn {
+            padding: 0.8rem 1.5rem;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .action-btn.primary {
+            background: #4CAF50;
+            color: white;
+        }
+
+        .action-btn.secondary {
+            background: #2196F3;
+            color: white;
+        }
+
+        .action-btn.warning {
+            background: #ff9800;
+            color: white;
+        }
+
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Admin Dashboard</h1>
+            <p>Organic Store Management System</p>
+        </div>
+
+        <div class="dashboard-grid">
+            <div class="dashboard-card">
+                <div class="card-icon">📦</div>
+                <h2 class="card-title">Products Management</h2>
+                <p class="card-description">Add, edit, and manage your product inventory</p>
+                <a href="admin_static.html" class="card-link">Manage Products</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">📋</div>
+                <h2 class="card-title">Orders Management</h2>
+                <p class="card-description">View and manage customer orders</p>
+                <a href="admin_static.html#orders" class="card-link">View Orders</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">👥</div>
+                <h2 class="card-title">User Management</h2>
+                <p class="card-description">Manage registered users and customers</p>
+                <a href="#" class="card-link" onclick="alert('User management coming soon!'); return false;">Manage Users</a>
+            </div>
+
+            <div class="dashboard-card">
+                <div class="card-icon">📊</div>
+                <h2 class="card-title">Analytics</h2>
+                <p class="card-description">View sales reports and analytics</p>
+                <a href="#" class="card-link" onclick="alert('Analytics coming soon!'); return false;">View Reports</a>
+            </div>
+        </div>
+
+        <div class="stats-section">
+            <h2>📈 Quick Statistics</h2>
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-number" id="total-products">-</div>
+                    <div class="stat-label">Total Products</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-orders">-</div>
+                    <div class="stat-label">Total Orders</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="total-users">-</div>
+                    <div class="stat-label">Total Users</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="pending-orders">-</div>
+                    <div class="stat-label">Pending Orders</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="quick-actions">
+            <h2>🚀 Quick Actions</h2>
+            <div class="action-buttons">
+                <a href="quick_product_fix.php" class="action-btn primary">🔄 Fix Products</a>
+                <a href="debug_cart.php" class="action-btn secondary">🔍 Debug Cart</a>
+                <a href="test_cart_system.php" class="action-btn secondary">🧪 Test System</a>
+                <a href="ensure_products.php" class="action-btn warning">📦 Sync Products</a>
+                <a href="products_simple.html" class="action-btn primary">🛍️ View Shop</a>
+                <a href="cart_static.html" class="action-btn secondary">🛒 View Cart</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="database_real.js"></script>
+    <script>
+        async function loadStats() {
+            try {
+                // Load products count
+                const products = await getAllProducts();
+                document.getElementById('total-products').textContent = products.length;
+
+                // Load orders count
+                const orders = await getAllOrders();
+                document.getElementById('total-orders').textContent = orders.length;
+                
+                // Count pending orders
+                const pendingOrders = orders.filter(order => order.status === 'pending').length;
+                document.getElementById('pending-orders').textContent = pendingOrders;
+
+                // Load users count (this would need a users API)
+                document.getElementById('total-users').textContent = 'N/A';
+
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                document.getElementById('total-products').textContent = 'Error';
+                document.getElementById('total-orders').textContent = 'Error';
+                document.getElementById('pending-orders').textContent = 'Error';
+            }
+        }
+
+        // Load stats when page loads
+        document.addEventListener('DOMContentLoaded', loadStats);
+    </script>
+</body>
+</html>

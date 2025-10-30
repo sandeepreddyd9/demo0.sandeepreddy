@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation - Organic Store</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirmation-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .success-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 60%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            80% { transform: translateY(-10px); }
+        }
+
+        h1 {
+            color: #28a745;
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+        }
+
+        .order-details {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: left;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 0.5rem;
+        }
+
+        .btn-secondary:hover {
+            background: #218838;
+            transform: translateY(-2px);
+        }
+
+        .shipping-info {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            text-align: left;
+        }
+
+        .shipping-info h3 {
+            margin-top: 0;
+            color: #1976d2;
+        }
+    </style>
+</head>
+<body>
+    <div class="confirmation-container">
+        <div class="success-icon">🎉</div>
+        <h1>Order Confirmed!</h1>
+        <p style="font-size: 1.2rem; color: #666; margin-bottom: 2rem;">
+            Thank you for your order! Your fresh organic products are on their way.
+        </p>
+
+        <div class="order-details" id="order-details">
+            <!-- Order details will be loaded here -->
+        </div>
+
+        <div class="shipping-info" id="shipping-info">
+            <!-- Shipping info will be loaded here -->
+        </div>
+
+        <div style="margin-top: 2rem;">
+            <a href="products_simple.html" class="btn-secondary">🛒 Continue Shopping</a>
+            <a href="index.html" class="btn-primary">🏠 Go Home</a>
+        </div>
+
+        <div style="margin-top: 2rem; padding-top: 2rem; border-top: 2px solid #eee; color: #666;">
+            <p><strong>What's Next?</strong></p>
+            <p>📧 Order confirmation sent to your email<br>
+            📱 Track your order status<br>
+            🚚 Estimated delivery: 2-3 business days</p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const orderId = urlParams.get('order');
+            
+            if (orderId) {
+                loadOrderDetails(orderId);
+            } else {
+                showOrderNotFound();
+            }
+        });
+
+        function showOrderNotFound(message = 'Unable to load order details.') {
+            document.getElementById('order-details').innerHTML = `
+                <div style="text-align: center; color: #dc3545;">
+                    <h3>Order not found</h3>
+                    <p>${message}</p>
+                </div>
+            `;
+            document.getElementById('shipping-info').innerHTML = '';
+        }
+
+        async function loadOrderDetails(orderId) {
+            try {
+                const response = await fetch(`orders_api.php?order_id=${encodeURIComponent(orderId)}`);
+                const result = await response.json();
+
+                if (!result.success || !result.order) {
+                    showOrderNotFound(result.error || 'Unable to load order details.');
+                    return;
+                }
+
+                renderOrderDetails(result.order);
+            } catch (error) {
+                console.error('Failed to load order details:', error);
+                showOrderNotFound('Something went wrong while loading the order.');
+            }
+        }
+
+        function renderOrderDetails(order) {
+            const orderDate = order.created_at ? new Date(order.created_at) : null;
+            const formattedDate = orderDate ? orderDate.toLocaleString() : 'N/A';
+
+            const totalAmount = order.total_amount ? Number(order.total_amount) : 0;
+            const paymentMethod = getPaymentMethodName(order.payment_method || 'cod');
+            const orderStatus = (order.status || 'pending').toUpperCase();
+
+            document.getElementById('order-details').innerHTML = `
+                <h3 style="margin-top: 0; color: #333;">Order Details</h3>
+                <div class="detail-row">
+                    <span>Order ID:</span>
+                    <span>#${order.id}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Order Date:</span>
+                    <span>${formattedDate}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Items:</span>
+                    <span>${Array.isArray(order.items) ? order.items.length : 0} items</span>
+                </div>
+                <div class="detail-row">
+                    <span>Payment Method:</span>
+                    <span>${paymentMethod}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Status:</span>
+                    <span style="color: #28a745; text-transform: capitalize;">${orderStatus.toLowerCase()}</span>
+                </div>
+                <div class="detail-row">
+                    <span>Total Amount:</span>
+                    <span>₹${totalAmount.toFixed(2)}</span>
+                </div>
+            `;
+
+            const shippingInfoContainer = document.getElementById('shipping-info');
+            const shippingDetails = order.shipping_address_parsed || {};
+            const formattedAddress = order.shipping_address_formatted || order.shipping_address || '';
+
+            let shippingHtml = '<h3>📦 Shipping Address</h3>';
+
+            if (shippingDetails && Object.keys(shippingDetails).length > 0) {
+                const fullName = [shippingDetails.firstName, shippingDetails.lastName].filter(Boolean).join(' ') || order.user_name || '';
+                const email = shippingDetails.email || order.email || '';
+                const phone = shippingDetails.phone || '';
+                const addressLines = [
+                    shippingDetails.address,
+                    [shippingDetails.city, shippingDetails.state].filter(Boolean).join(', '),
+                    shippingDetails.pincode,
+                    shippingDetails.country
+                ].filter(Boolean).join('<br>');
+
+                shippingHtml += `
+                    <p>
+                        ${fullName ? `<strong>${fullName}</strong><br>` : ''}
+                        ${addressLines ? `${addressLines}<br>` : ''}
+                        ${phone ? `📞 ${phone}<br>` : ''}
+                        ${email ? `📧 ${email}` : ''}
+                    </p>
+                `;
+            } else if (formattedAddress) {
+                shippingHtml += `<p>${formattedAddress.replace(/\n/g, '<br>')}</p>`;
+            } else {
+                shippingHtml += '<p>No shipping address available.</p>';
+            }
+
+            shippingInfoContainer.innerHTML = shippingHtml;
+
+            if (Array.isArray(order.items) && order.items.length > 0) {
+                const itemsList = document.createElement('div');
+                itemsList.style.marginTop = '1.5rem';
+                itemsList.innerHTML = `
+                    <h3>🧾 Order Items</h3>
+                    <div style="background:#f8f9fa; border-radius:10px; padding:1.5rem;">
+                        ${order.items.map(item => `
+                            <div style="display:flex; justify-content:space-between; padding:0.5rem 0; border-bottom:1px solid #e0e0e0;">
+                                <span>${item.quantity} × ${item.name || 'Item #' + item.product_id}</span>
+                                <span>₹${Number(item.price || 0).toFixed(2)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                shippingInfoContainer.appendChild(itemsList);
+            }
+        }
+
+        function getPaymentMethodName(method) {
+            const methods = {
+                'upi': 'UPI',
+                'card': 'Credit/Debit Card',
+                'netbanking': 'Net Banking',
+                'cod': 'Cash on Delivery'
+            };
+            return methods[method] || method;
+        }
+    </script>
+</body>
+</html>

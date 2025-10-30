@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Products - Organic Store</title>
+    <link rel="stylesheet" href="STYLE.css">
+    <link rel="stylesheet" href="Styles.css">
+    <link rel="stylesheet" href="modern-navbar.css">
+    <style>
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        
+        .container { 
+            max-width: 1200px; 
+            margin: 0 auto; 
+            padding: 1rem; 
+        }
+        
+        .filters { 
+            padding: 2rem; 
+            background: white; 
+            display: flex; 
+            gap: 1rem; 
+            flex-wrap: wrap; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1); 
+            border-radius: 15px;
+            margin-bottom: 2rem;
+        }
+        
+        .filters input, .filters select { 
+            padding: 0.75rem; 
+            border: 2px solid #ddd; 
+            border-radius: 10px; 
+            font-size: 1rem; 
+            min-width: 200px;
+            transition: all 0.3s ease;
+        }
+        
+        .filters input:focus, .filters select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        #search-input { 
+            flex: 1; 
+            min-width: 250px; 
+        }
+        
+        .products-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); 
+            gap: 2rem; 
+            padding: 0; 
+            min-height: 400px; 
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #333;
+            font-weight: 700;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+        
+        .notification.success { background: #4CAF50; }
+        .notification.error { background: #f44336; }
+        .notification.show { opacity: 1; }
+
+        .loading {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+
+        .empty-cart {
+            text-align: center;
+            padding: 3rem;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <!-- Modern Navigation Bar -->
+    <nav class="modern-navbar">
+        <div class="navbar-container">
+            <a href="index_db.html" class="navbar-brand">
+                <div class="brand-icon">🌱</div>
+                <span class="brand-text">GreenCart</span>
+            </a>
+
+            <div class="navbar-search">
+                <span class="search-icon">🔍</span>
+                <input type="text" class="search-input" placeholder="Search organic products...">
+            </div>
+
+            <ul class="navbar-nav">
+                <li class="nav-item">
+                    <a href="index_db.html" class="nav-link" data-page="home">
+                        <span>🏠</span> Home
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="products_db.html" class="nav-link active" data-page="products">
+                        <span>🛒</span> Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a href="cart_db.html" class="nav-link" data-page="cart">
+                        <span>🛍️</span> Cart
+                        <span class="cart-badge" id="cart-count">0</span>
+                    </a>
+                </li>
+            </ul>
+
+            <button class="notification-bell">🔔</button>
+
+            <div class="navbar-auth">
+                <button class="auth-btn btn-login">
+                    <span>👤</span> Login
+                </button>
+                <button class="auth-btn btn-register">
+                    <span>✨</span> Register
+                </button>
+            </div>
+
+            <button class="mobile-toggle">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <div style="height: 80px;"></div>
+
+    <main class="container">
+        <h1>Our Products</h1>
+        <div class="filters">
+            <input type="text" id="search-input" placeholder="Search products...">
+            <select id="category-filter">
+                <option value="">All Categories</option>
+            </select>
+            <select id="sort-by">
+                <option value="name">Sort by Name</option>
+                <option value="price-low">Price: Low to High</option>
+                <option value="price-high">Price: High to Low</option>
+                <option value="rating">Rating</option>
+            </select>
+        </div>
+        <div id="products-grid" class="products-grid">
+            <div class="loading">
+                <h2>Loading products...</h2>
+                <p>Please wait a moment</p>
+            </div>
+        </div>
+    </main>
+
+    <div id="notification" class="notification"></div>
+
+    <script src="database_real.js"></script>
+    
+    <script>
+        let allProducts = [];
+        let currentUser = null;
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            loadUser();
+            updateAuthUI();
+            await loadProducts();
+            await loadCategoriesFilter();
+            setupFilters();
+            updateCartCount();
+        });
+
+        function loadUser() {
+            const savedUser = localStorage.getItem('currentUser');
+            currentUser = savedUser ? JSON.parse(savedUser) : null;
+        }
+
+        async function loadProducts() {
+            try {
+                allProducts = await getProducts();
+                displayProducts(allProducts);
+            } catch (error) {
+                console.error('Error loading products:', error);
+                showNotification('Error loading products', 'error');
+            }
+        }
+
+        function displayProducts(productsToShow) {
+            const productsGrid = document.getElementById('products-grid');
+            if (!productsGrid) return;
+
+            if (productsToShow.length === 0) {
+                productsGrid.innerHTML = `
+                    <div class="empty-cart" style="grid-column: 1/-1;">
+                        <h2>No products found</h2>
+                        <p>Try adjusting your search or filters</p>
+                    </div>
+                `;
+                return;
+            }
+
+            productsGrid.innerHTML = productsToShow.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        ${createProductImage(product)}
+                    </div>
+                    <div class="product-info">
+                        <h3>${product.name}</h3>
+                        <div class="product-price">₹${product.price}</div>
+                        <div class="product-rating">⭐ ${product.rating || 4.5}</div>
+                        <p class="farmer">By ${product.farmer_info || 'Trusted Farmer'}</p>
+                        <p>${product.description}</p>
+                        <button class="btn-primary" onclick="addToCart(${product.id})" aria-label="Add ${product.name} to cart">
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function createProductImage(product) {
+            const fallbackImage = `https://via.placeholder.com/400x400/4CAF50/ffffff?text=${encodeURIComponent(product.name)}`;
+            
+            if (product.image_url) {
+                return `
+                    <img 
+                        src="${product.image_url}" 
+                        alt="${product.name}" 
+                        style="width:100%; height:100%; object-fit:cover; border-radius:8px;" 
+                        loading="lazy"
+                        onerror="this.onerror=null; this.src='${fallbackImage}';"
+                    >
+                `;
+            } else {
+                return `
+                    <img 
+                        src="${fallbackImage}" 
+                        alt="${product.name}" 
+                        style="width:100%; height:100%; object-fit:cover; border-radius:8px;" 
+                        loading="lazy"
+                    >
+                `;
+            }
+        }
+
+        function setupFilters() {
+            const searchInput = document.getElementById('search-input');
+            const categoryFilter = document.getElementById('category-filter');
+            const sortBy = document.getElementById('sort-by');
+
+            if (searchInput) {
+                searchInput.addEventListener('input', filterProducts);
+            }
+            if (categoryFilter) {
+                categoryFilter.addEventListener('change', filterProducts);
+            }
+            if (sortBy) {
+                sortBy.addEventListener('change', filterProducts);
+            }
+        }
+
+        function filterProducts() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase();
+            const category = document.getElementById('category-filter').value;
+            const sortBy = document.getElementById('sort-by').value;
+
+            let filtered = allProducts.filter(product => {
+                const matchesSearch = product.name.toLowerCase().includes(searchTerm) || 
+                                    product.description.toLowerCase().includes(searchTerm);
+                const matchesCategory = !category || product.category_id == category;
+                return matchesSearch && matchesCategory;
+            });
+
+            // Sort products
+            switch(sortBy) {
+                case 'price-low':
+                    filtered.sort((a, b) => a.price - b.price);
+                    break;
+                case 'price-high':
+                    filtered.sort((a, b) => b.price - a.price);
+                    break;
+                case 'rating':
+                    filtered.sort((a, b) => (b.rating || 4.5) - (a.rating || 4.5));
+                    break;
+                default:
+                    filtered.sort((a, b) => a.name.localeCompare(b.name));
+            }
+
+            displayProducts(filtered);
+        }
+
+        async function loadCategoriesFilter() {
+            const categoryFilter = document.getElementById('category-filter');
+            if (!categoryFilter) return;
+
+            try {
+                const categories = await getCategories();
+                
+                categories.forEach(category => {
+                    const option = document.createElement('option');
+                    option.value = category.id;
+                    option.textContent = category.name;
+                    categoryFilter.appendChild(option);
+                });
+            } catch (error) {
+                console.error('Error loading categories:', error);
+            }
+        }
+
+        async function addToCart(productId) {
+            if (!currentUser) {
+                showNotification('Please login to add items to cart', 'error');
+                return;
+            }
+
+            try {
+                const result = await addToCartDB(currentUser.id, productId, 1);
+                
+                if (result.success) {
+                    updateCartCount();
+                    const product = allProducts.find(p => Number(p.id) === Number(productId));
+                    showNotification(`${product ? product.name : 'Item'} added to cart!`, 'success');
+                } else {
+                    showNotification('Failed to add item to cart: ' + (result.error || 'Unknown error'), 'error');
+                }
+            } catch (error) {
+                console.error('Error adding to cart:', error);
+                showNotification('Error adding item to cart', 'error');
+            }
+        }
+
+        async function updateCartCount() {
+            const cartCount = document.getElementById('cart-count');
+            if (!cartCount) return;
+
+            if (currentUser) {
+                try {
+                    const cartItems = await getCartItems(currentUser.id);
+                    const totalItems = cartItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+                    cartCount.textContent = totalItems || '0';
+                } catch (error) {
+                    console.error('Error updating cart count:', error);
+                    cartCount.textContent = '0';
+                }
+            } else {
+                cartCount.textContent = '0';
+            }
+        }
+
+        // Authentication functions
+        function showAuthForm(type) {
+            // Redirect to homepage for authentication
+            localStorage.setItem('authAction', type);
+            window.location.href = 'index_db.html';
+        }
+
+        function updateAuthUI() {
+            const authSection = document.querySelector('.navbar-auth');
+            if (currentUser) {
+                authSection.innerHTML = `
+                    <span style="color: white; margin-right: 1rem; font-weight: 500;">Welcome, ${currentUser.name}!</span>
+                    <button class="auth-btn" onclick="logout()" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 5px; cursor: pointer;">
+                        <span>🚪</span> Logout
+                    </button>
+                `;
+            } else {
+                authSection.innerHTML = `
+                    <button class="auth-btn btn-login" onclick="showAuthForm('login')"><span>👤</span> Login</button>
+                    <button class="auth-btn btn-register" onclick="showAuthForm('register')"><span>✨</span> Register</button>
+                `;
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('currentUser');
+            currentUser = null;
+            updateAuthUI();
+            updateCartCount();
+            showNotification('Logged out successfully!', 'success');
+        }
+
+        function showNotification(message, type = 'info') {
+            const notification = document.getElementById('notification');
+            const colors = {
+                success: '#4CAF50',
+                error: '#f44336',
+                info: '#2196F3'
+            };
+
+            notification.style.backgroundColor = colors[type] || colors.info;
+            notification.textContent = message;
+            notification.classList.add('show');
+
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

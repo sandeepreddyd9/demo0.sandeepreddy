@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Login - GreenCart</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f8f9fa; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #f8d7da; color: #721c24; }
+        .success { background: #d4edda; color: #155724; }
+        .info { background: #d1ecf1; color: #0c5460; }
+        button { padding: 10px 20px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1001;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+        .modal-content {
+            background-color: white;
+            margin: 10% auto;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 400px;
+            position: relative;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            position: absolute;
+            right: 1rem;
+            top: 1rem;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+            text-align: left;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+        .btn-primary {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Login/Register Debug Page</h1>
+    
+    <div class="debug info">
+        <h3>Debug Information</h3>
+        <p>This page will help identify why login/register isn't working.</p>
+    </div>
+
+    <!-- Test Buttons -->
+    <div class="debug">
+        <h3>Test Buttons</h3>
+        <button class="auth-btn btn-login">👤 Login</button>
+        <button class="auth-btn btn-register">✨ Register</button>
+        <button onclick="manualTest()">🧪 Manual Test</button>
+        <button onclick="checkScripts()">📋 Check Scripts</button>
+    </div>
+
+    <!-- Debug Output -->
+    <div id="debug-output" class="debug">
+        <h3>Debug Output</h3>
+        <p>Click buttons above to see debug information...</p>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="auth-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <div id="auth-forms">
+                <!-- Forms will be loaded here by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Load Scripts -->
+    <script src="static-products-data.js"></script>
+    <script src="database.js"></script>
+    <script src="auth-ui.js"></script>
+
+    <script>
+        // Debug functions
+        function log(message, type = 'info') {
+            const output = document.getElementById('debug-output');
+            const timestamp = new Date().toLocaleTimeString();
+            const className = type === 'error' ? 'error' : type === 'success' ? 'success' : 'info';
+            
+            output.innerHTML += `
+                <div class="debug ${className}">
+                    <strong>[${timestamp}]</strong> ${message}
+                </div>
+            `;
+        }
+
+        function checkScripts() {
+            log('🔍 Checking if scripts are loaded...');
+            
+            // Check if functions exist
+            if (typeof registerUser === 'function') {
+                log('✅ registerUser function exists', 'success');
+            } else {
+                log('❌ registerUser function NOT found', 'error');
+            }
+            
+            if (typeof loginUser === 'function') {
+                log('✅ loginUser function exists', 'success');
+            } else {
+                log('❌ loginUser function NOT found', 'error');
+            }
+            
+            if (typeof showAuthForm === 'function') {
+                log('✅ showAuthForm function exists', 'success');
+            } else {
+                log('❌ showAuthForm function NOT found', 'error');
+            }
+            
+            if (typeof setupAuthButtons === 'function') {
+                log('✅ setupAuthButtons function exists', 'success');
+            } else {
+                log('❌ setupAuthButtons function NOT found', 'error');
+            }
+            
+            // Check if staticProducts is loaded
+            if (typeof staticProducts !== 'undefined') {
+                log(`✅ staticProducts loaded (${staticProducts.length} products)`, 'success');
+            } else {
+                log('❌ staticProducts NOT loaded', 'error');
+            }
+            
+            // Check localStorage
+            const users = localStorage.getItem('users');
+            log(`📦 Users in localStorage: ${users ? JSON.parse(users).length : 0}`);
+            
+            const currentUser = localStorage.getItem('currentUser');
+            log(`👤 Current user: ${currentUser ? JSON.parse(currentUser).name : 'None'}`);
+        }
+
+        async function manualTest() {
+            log('🧪 Starting manual test...');
+            
+            try {
+                // Test registration
+                log('Testing registration...');
+                const regResult = await registerUser({
+                    name: 'Test User',
+                    email: 'test@example.com',
+                    password: 'password123',
+                    phone: '1234567890'
+                });
+                
+                if (regResult.success) {
+                    log('✅ Registration successful!', 'success');
+                } else {
+                    log(`❌ Registration failed: ${regResult.error}`, 'error');
+                }
+                
+                // Test login
+                log('Testing login...');
+                const loginResult = await loginUser({
+                    email: 'test@example.com',
+                    password: 'password123'
+                });
+                
+                if (loginResult.success) {
+                    log('✅ Login successful!', 'success');
+                } else {
+                    log(`❌ Login failed: ${loginResult.error}`, 'error');
+                }
+                
+            } catch (error) {
+                log(`❌ Test error: ${error.message}`, 'error');
+            }
+        }
+
+        // Initialize when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            log('🚀 Page loaded, initializing...');
+            
+            // Check if buttons exist
+            const loginBtns = document.querySelectorAll('.btn-login');
+            const registerBtns = document.querySelectorAll('.btn-register');
+            
+            log(`Found ${loginBtns.length} login buttons`);
+            log(`Found ${registerBtns.length} register buttons`);
+            
+            // Try to setup auth buttons
+            if (typeof setupAuthButtons === 'function') {
+                setupAuthButtons();
+                log('✅ Auth buttons setup called', 'success');
+            } else {
+                log('❌ setupAuthButtons function not available', 'error');
+            }
+            
+            // Manual event listeners as backup
+            loginBtns.forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    log(`🖱️ Login button ${index + 1} clicked`);
+                    if (typeof showAuthForm === 'function') {
+                        showAuthForm('login');
+                    } else {
+                        log('❌ showAuthForm not available', 'error');
+                    }
+                });
+            });
+            
+            registerBtns.forEach((btn, index) => {
+                btn.addEventListener('click', function() {
+                    log(`🖱️ Register button ${index + 1} clicked`);
+                    if (typeof showAuthForm === 'function') {
+                        showAuthForm('register');
+                    } else {
+                        log('❌ showAuthForm not available', 'error');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

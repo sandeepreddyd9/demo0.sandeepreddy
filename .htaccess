@@ -1,0 +1,5 @@
+AddType application/x-httpd-php .php
+AddHandler application/x-httpd-php .php
+# Ensure index resolves to PHP when present
+DirectoryIndex index.php index.html
+
